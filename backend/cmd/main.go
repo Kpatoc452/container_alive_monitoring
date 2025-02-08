@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	handlers "github.com/Kpatoc452/container_manager/controllers"
 	"github.com/Kpatoc452/container_manager/storage"
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,11 @@ func main() {
 
 	db := storage.MustNew()
 	handler := handlers.New(db)
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+	r.Use(cors.New(config))
 
 	r.GET("/containers", handler.GetAll)
 	r.GET("/container/:id", handler.Get)

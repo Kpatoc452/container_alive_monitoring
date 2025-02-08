@@ -15,22 +15,23 @@ func (p *Postgres) Get(id int) (models.Container, error) {
 }
 
 func (p *Postgres) GetAll() ([]models.Container, error) {
-	var containers []models.Container
+	var containers []models.Container = make([]models.Container, 0)
 
 	rows, err := p.conn.Query(ctx, "SELECT * FROM containers ")
 	if err != nil {
-		return nil, err
+		return containers, err
 	}
 
 	for rows.Next() {
 		var container models.Container
 		err = rows.Scan(&container.Id, &container.Address, &container.LastPing, &container.LastSuccessPing)
 		if err != nil {
-			return nil, err
+			return containers, err
 		}
 
 		containers = append(containers, container)
 	}
+
 
 	return containers, err
 }

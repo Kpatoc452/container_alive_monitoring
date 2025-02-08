@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
+	"net/netip"
 	"strconv"
 
 	"github.com/Kpatoc452/container_manager/models"
@@ -28,11 +30,13 @@ func (h *Handler) Get(c *gin.Context) {
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusNotFound, err.Error())
+		return
 	}
 
 	container, err := h.db.Get(id)
 	if err != nil {
 		c.String(http.StatusNotFound, err.Error())
+		return
 	}
 
 	c.JSON(http.StatusOK, container)
@@ -42,6 +46,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 	containers, err := h.db.GetAll()
 	if err != nil {
 		c.String(http.StatusBadGateway, err.Error())
+		return
 	}
 
 	c.JSON(http.StatusOK, containers)
@@ -55,15 +60,24 @@ func (h *Handler) Create(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&msg)
 	if err != nil {
-		c.String(http.StatusNotFound, err.Error())
+		c.JSON(http.StatusNotFound, err.Error())
+		return
+	}
+
+	_, err = netip.ParseAddrPort(msg.Address)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "Invalid IP address")
+		return
 	}
 
 	err = h.db.Create(msg.Address)
 	if err != nil {
-		c.String(http.StatusBadGateway, err.Error())
+		c.JSON(http.StatusBadGateway, err.Error())
+		return
 	}
 
-	c.String(http.StatusOK, "ok")
+	log.Println("Handler Created container")
+	c.JSON(http.StatusOK, "ok")
 }
 
 func (h *Handler) Update(c *gin.Context) {
@@ -76,11 +90,21 @@ func (h *Handler) Update(c *gin.Context) {
 	err := c.ShouldBindJSON(&msg)
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
+		return
 	}
+
+	_, err = netip.ParseAddrPort(msg.Address)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "Invalid IP address")
+		return
+	}
+
+	
 
 	err = h.db.Update(msg.Id, msg.Address)
 	if err != nil {
 		c.String(http.StatusBadGateway, err.Error())
+		return
 	}
 
 	c.String(http.StatusOK, "ok")
@@ -90,11 +114,13 @@ func (h *Handler) Delete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
+		return
 	}
 
 	err = h.db.Delete(id)
 	if err != nil {
 		c.String(http.StatusBadGateway, err.Error())
+		return
 	}
 
 	c.JSON(http.StatusOK, "ok")
