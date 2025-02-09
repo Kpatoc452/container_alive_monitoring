@@ -11,7 +11,7 @@ import (
 var (
 	numCPU   = runtime.GOMAXPROCS(0)
 	url      = "http://api:8080/containers"
-	interval = 10 * time.Minute
+	interval = 1 * time.Minute
 )
 
 func GetContainers() []Container {
