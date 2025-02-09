@@ -160,7 +160,7 @@ func (wp *workerPool) sendContainers(data []Container) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewReader(marshaled))
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(marshaled))
 
 	req.Header.Set("Content-Type", "application/json")
 

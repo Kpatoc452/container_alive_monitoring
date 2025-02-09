@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (p *Postgres) Get(id int) (models.Container, error) {
+func (p *Postgres) GetContainerByID(id int) (models.Container, error) {
 	var container models.Container
 
 	data := p.conn.QueryRow(ctx, "SELECT * FROM containers WHERE id=$1", id)
@@ -16,7 +16,7 @@ func (p *Postgres) Get(id int) (models.Container, error) {
 	return container, err
 }
 
-func (p *Postgres) GetAll() ([]models.Container, error) {
+func (p *Postgres) GetAllContainers() ([]models.Container, error) {
 	var containers []models.Container = make([]models.Container, 0)
 
 	rows, err := p.conn.Query(ctx, "SELECT * FROM containers ")
@@ -38,18 +38,18 @@ func (p *Postgres) GetAll() ([]models.Container, error) {
 	return containers, err
 }
 
-func (p *Postgres) Create(address string) error {
+func (p *Postgres) CreateContainer(address string) error {
 	_, err := p.conn.Exec(ctx, "INSERT INTO containers(address, last_ping, last_success_ping) VALUES($1, $2, $3)", address, time.Date(1970, time.January, 1, 0, 0, 0, 0, time.Now().Location()), time.Date(1970, time.January, 1, 0, 0, 0, 0, time.Now().Location()))
 	return err
 }
 
-func (p *Postgres) Update(id int, newAddress string) error {
+func (p *Postgres) UpdateContainerByID(id int, newAddress string) error {
 	_, err := p.conn.Exec(ctx, "UPDATE containers SET address=$1 WHERE id=$2", newAddress, id)
 
 	return err
 }
 
-func (p *Postgres) UpdateTime(containers []models.Container) error {
+func (p *Postgres) UpdateTimeContainers(containers []models.Container) error {
 	query := "UPDATE containers SET last_ping=@last_ping, last_success_ping=@last_success_ping WHERE id=@id"
 	
 	batch := &pgx.Batch{}
@@ -72,7 +72,7 @@ func (p *Postgres) UpdateTime(containers []models.Container) error {
 	return err
 }
 
-func (p *Postgres) Delete(id int) error {
+func (p *Postgres) DeleteContainerByID(id int) error {
 	_, err := p.conn.Exec(ctx, "DELETE FROM containers WHERE id=$1", id)
 	return err
 }

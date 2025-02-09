@@ -18,14 +18,13 @@ func main() {
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
 	r.Use(cors.New(config))
 
-	r.GET("/containers", handler.GetAll)
-	r.GET("/container/:id", handler.Get)
-	r.POST("/container", handler.Create)
-	r.PUT("/container", handler.Update)
-	r.DELETE("/container/:id", handler.Delete)
+	r.GET("/containers", handler.GetAllContainers)
+	r.GET("/container/:id", handler.GetContainerByID)
+	r.POST("/container", handler.CreateContainer)
+	r.PUT("/container", handler.UpdateContainerByID)
+	r.DELETE("/container/:id", handler.DeleteContainerByID)
 
-	r.POST("/pinger", handler.UpdateTime)
+	r.PUT("/pinger", handler.UpdateTimeContainers) // Endpoint for update time pings for pinger
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-
+	r.Run()
 }

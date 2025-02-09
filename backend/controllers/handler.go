@@ -11,12 +11,12 @@ import (
 )
 
 type database interface {
-	Get(id int) (models.Container, error)
-	GetAll() ([]models.Container, error)
-	Create(address string) error
-	Update(id int, newAddress string) error
-	Delete(id int) error
-	UpdateTime(containers []models.Container) error
+	GetContainerByID(id int) (models.Container, error)
+	GetAllContainers() ([]models.Container, error)
+	CreateContainer(address string) error
+	UpdateContainerByID(id int, newAddress string) error
+	DeleteContainerByID(id int) error
+	UpdateTimeContainers(containers []models.Container) error
 }
 
 type Handler struct {
@@ -27,14 +27,14 @@ func New(db database) *Handler {
 	return &Handler{db}
 }
 
-func (h *Handler) Get(c *gin.Context) {
+func (h *Handler) GetContainerByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusNotFound, err.Error())
 		return
 	}
 
-	container, err := h.db.Get(id)
+	container, err := h.db.GetContainerByID(id)
 	if err != nil {
 		c.String(http.StatusNotFound, err.Error())
 		return
@@ -43,8 +43,8 @@ func (h *Handler) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, container)
 }
 
-func (h *Handler) GetAll(c *gin.Context) {
-	containers, err := h.db.GetAll()
+func (h *Handler) GetAllContainers(c *gin.Context) {
+	containers, err := h.db.GetAllContainers()
 	if err != nil {
 		c.String(http.StatusBadGateway, err.Error())
 		return
@@ -53,7 +53,7 @@ func (h *Handler) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, containers)
 }
 
-func (h *Handler) Create(c *gin.Context) {
+func (h *Handler) CreateContainer(c *gin.Context) {
 	type createJson struct {
 		Address string `json:"address"`
 	}
@@ -71,7 +71,7 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	err = h.db.Create(msg.Address)
+	err = h.db.CreateContainer(msg.Address)
 	if err != nil {
 		c.JSON(http.StatusBadGateway, err.Error())
 		return
@@ -81,7 +81,7 @@ func (h *Handler) Create(c *gin.Context) {
 	c.JSON(http.StatusOK, "ok")
 }
 
-func (h *Handler) Update(c *gin.Context) {
+func (h *Handler) UpdateContainerByID(c *gin.Context) {
 	type updateJson struct {
 		Id      int    `json:"id"`
 		Address string `json:"address"`
@@ -102,7 +102,7 @@ func (h *Handler) Update(c *gin.Context) {
 
 	
 
-	err = h.db.Update(msg.Id, msg.Address)
+	err = h.db.UpdateContainerByID(msg.Id, msg.Address)
 	if err != nil {
 		c.String(http.StatusBadGateway, err.Error())
 		return
@@ -111,7 +111,7 @@ func (h *Handler) Update(c *gin.Context) {
 	c.String(http.StatusOK, "ok")
 }
 
-func (h *Handler) UpdateTime(c *gin.Context) {
+func (h *Handler) UpdateTimeContainers(c *gin.Context) {
 	containers := make([]models.Container, 0)
 
 	err := c.ShouldBindJSON(&containers)
@@ -120,7 +120,7 @@ func (h *Handler) UpdateTime(c *gin.Context) {
 		return
 	}
 
-	err = h.db.UpdateTime(containers)
+	err = h.db.UpdateTimeContainers(containers)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error update time in psql")
 		return
@@ -128,14 +128,14 @@ func (h *Handler) UpdateTime(c *gin.Context) {
 	c.String(http.StatusOK, "Time updated")
 }
 
-func (h *Handler) Delete(c *gin.Context) {
+func (h *Handler) DeleteContainerByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = h.db.Delete(id)
+	err = h.db.DeleteContainerByID(id)
 	if err != nil {
 		c.String(http.StatusBadGateway, err.Error())
 		return
