@@ -11,12 +11,10 @@ const ContainerTable = () => {
     direction: 'asc'
   });
 
-  // Fetch all containers
   useEffect(() => {
     fetchContainers();
   }, []);
 
-  // Сортировка контейнеров
   const sortedContainers = React.useMemo(() => {
     const sortableItems = [...containers];
     if (sortConfig.key) {
@@ -50,7 +48,6 @@ const ContainerTable = () => {
     }
   };
 
-  // Create container
   const handleCreate = async () => {
     try {
       await axios.post('http://localhost:8080/container', newContainer);
@@ -61,7 +58,6 @@ const ContainerTable = () => {
     }
   };
 
-  // Update container
   const handleUpdate = async () => {
     try {
       await axios.put('http://localhost:8080/container', editingContainer);
@@ -72,7 +68,6 @@ const ContainerTable = () => {
     }
   };
 
-  // Delete container
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/container/${id}`);
@@ -82,7 +77,6 @@ const ContainerTable = () => {
     }
   };
 
-  // Date formatting helper
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString();
@@ -92,7 +86,6 @@ const ContainerTable = () => {
     <div className="container">
       <h2>Container Listing</h2>
       
-      {/* Add New Form */}
       <div className="add-form">
         <input
           type="text"
@@ -103,7 +96,6 @@ const ContainerTable = () => {
         <button onClick={handleCreate}>Add New</button>
       </div>
 
-      {/* Table */}
       <table>
         <thead>
           <tr>
@@ -159,7 +151,6 @@ const ContainerTable = () => {
         </tbody>
       </table>
 
-      {/* Details Modal */}
       {showDetails && (
         <div className="modal">
           <h3>Container Details</h3>

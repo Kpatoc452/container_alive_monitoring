@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"log"
-	"time"
 
 	// "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,7 +15,6 @@ type Postgres struct {
 }
 
 func MustNew() *Postgres {
-	time.Sleep(20 * time.Second)
 	connStr := "postgres://postgres:manager@localhost:8081/postgres"
 
 	conn, err := pgxpool.New(ctx, connStr)
