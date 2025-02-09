@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/netip"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -76,7 +74,6 @@ func (wp *workerPool) process(id int) {
 	for {
 		select {
 		case msg := <-wp.msgChan:
-			wp.opts.Logger.Logf("Worker %d is running\n", id)
 			if len(msg) == 0 {
 				wp.opts.Logger.Logf("Len msg is 0\n")
 				break
@@ -84,27 +81,27 @@ func (wp *workerPool) process(id int) {
 
 			for i := 0; i < len(msg); i++ {
 				container := msg[i]
+				address := container.Address
 
-				// TODO: make faster parsing
-				address, err := netip.ParseAddrPort(container.Address)
-				if err != nil {
-					wp.opts.Logger.Logf("%s Couldn't parse netip\n", container)
-					break
+				var index int
+
+				for i := len(address) - 1; i >= 0; i-- {
+					if address[i] == ':' {
+						index = i
+						break
+					}
 				}
 
-				host := address.Addr().String()
-				port := strconv.Itoa(int(address.Port()))
-
-				if wp.ping(host, port) {
+				if wp.ping(address[:index], address[index+1:]) {
 					msg[i].LastSuccessPing = time.Now()
 				}
 
 				msg[i].LastPing = time.Now()
 			}
 
-            err := wp.sendContainers(msg)
+			err := wp.sendContainers(msg)
 			if err != nil {
-				wp.opts.Logger.Logf("error send containers %v\n", err)
+				wp.opts.Logger.Logf("error send containers data %v\n", err)
 				break
 			}
 
@@ -141,13 +138,13 @@ func (wp *workerPool) ping(ip string, port string) bool {
 
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(ip, port), timeout)
 	if err != nil {
-		wp.opts.Logger.Logf("Connection error %v\n", err)
+		wp.opts.Logger.Logf("Connection error with %s:%s\n", ip, port)
 		return false
 	}
 
 	if conn != nil {
 		defer conn.Close()
-		wp.opts.Logger.Logf("Connection successful!")
+		wp.opts.Logger.Logf("Connection successful! with %s:%s", ip, port)
 		return true
 	}
 
@@ -155,7 +152,7 @@ func (wp *workerPool) ping(ip string, port string) bool {
 }
 
 func (wp *workerPool) sendContainers(data []Container) error {
-	url := "http://localhost:8080/pinger"
+	url := "http://api:8080/pinger"
 
 	marshaled, err := json.Marshal(data)
 	if err != nil {

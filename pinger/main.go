@@ -2,63 +2,73 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"runtime"
 	"time"
 )
 
 var (
-	numCPU = runtime.GOMAXPROCS(0)
+	numCPU   = runtime.GOMAXPROCS(0)
+	url      = "http://api:8080/containers"
+	interval = 10 * time.Minute
 )
 
+func GetContainers() []Container {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var containers []Container
+	json.Unmarshal(respBody, &containers)
+
+	return containers
+}
+
 func main() {
+	time.Sleep(25 * time.Second) // waiting postgresql container and rest api server container
+
 	wp := New()
 	defer wp.Stop()
 
 	wp.AddGroupWorker(numCPU)
 
 	for {
-		req, err := http.NewRequest("GET", "http://localhost:8080/containers", nil)
-		if err != nil {
-			panic(err)
-		}
+		containers := GetContainers()
 
-		client := &http.Client{}
+		var piecesContainers [][]Container
 
-		resp, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
+		chunkSize := (len(containers) + numCPU - 1) / numCPU
 
-		respBody, err := ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			panic(err)
-		}
-
-		var body []Container
-		json.Unmarshal(respBody, &body)
-
-		var divided [][]Container
-
-		chunkSize := (len(body) + numCPU - 1) / numCPU
-
-		for i := 0; i < len(body); i += chunkSize {
+		for i := 0; i < len(containers); i += chunkSize {
 			end := i + chunkSize
 
-			if end > len(body) {
-				end = len(body)
+			if end > len(containers) {
+				end = len(containers)
 			}
 
-			divided = append(divided, body[i:end])
+			piecesContainers = append(piecesContainers, containers[i:end])
 		}
 
-		for _, c := range divided {
+		for _, c := range piecesContainers {
 			wp.SendMsg(c)
 		}
 
-		time.Sleep(10 * time.Minute)
+		time.Sleep(interval)
 	}
 
 }

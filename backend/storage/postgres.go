@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"log"
+	"time"
 
 	// "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,7 +16,10 @@ type Postgres struct {
 }
 
 func MustNew() *Postgres {
-	connStr := "postgres://postgres:manager@localhost:8081/postgres"
+	log.Println("Waiting to start psql connection")
+	time.Sleep(25 * time.Second)
+	log.Println("Starting connection to psql")
+	connStr := "postgres://postgres:manager@psql:5432/postgres"
 
 	conn, err := pgxpool.New(ctx, connStr)
 
@@ -25,7 +29,7 @@ func MustNew() *Postgres {
 		panic(err)
 	}
 
-	log.Println("Connected to db")
+	
 
 	err = conn.Ping(ctx)
 	if err != nil {
@@ -46,5 +50,7 @@ func MustNew() *Postgres {
 
 		panic(err)
 	}
+
+	log.Println("Connected to db")
 	return p
 }
