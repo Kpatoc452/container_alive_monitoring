@@ -3,26 +3,39 @@ package storage
 import (
 	"context"
 	"log"
+	"time"
 
-	"github.com/jackc/pgx/v5"
+	// "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var ctx = context.Background()
 
 type Postgres struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func MustNew() *Postgres {
+	time.Sleep(20 * time.Second)
 	connStr := "postgres://postgres:manager@localhost:8081/postgres"
-	conn, err := pgx.Connect(ctx, connStr)
-	if err != nil {
+
+	conn, err := pgxpool.New(ctx, connStr)
+
+	if err != nil || conn == nil {
 		log.Println("Connection to postgress Error!")
 
 		panic(err)
 	}
 
-	p := Postgres{conn}
+	log.Println("Connected to db")
+
+	err = conn.Ping(ctx)
+	if err != nil {
+		log.Println("error ping db")
+		panic(err)
+	}
+
+	p := &Postgres{conn}
 	querry := `CREATE TABLE IF NOT EXISTS containers (
 			id SERIAL PRIMARY KEY,
 			address VARCHAR(25) NOT NULL,
@@ -35,5 +48,5 @@ func MustNew() *Postgres {
 
 		panic(err)
 	}
-	return &p
+	return p
 }

@@ -16,6 +16,7 @@ type database interface {
 	Create(address string) error
 	Update(id int, newAddress string) error
 	Delete(id int) error
+	UpdateTime(containers []models.Container) error
 }
 
 type Handler struct {
@@ -108,6 +109,23 @@ func (h *Handler) Update(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, "ok")
+}
+
+func (h *Handler) UpdateTime(c *gin.Context) {
+	containers := make([]models.Container, 0)
+
+	err := c.ShouldBindJSON(&containers)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Couldn't unmarshall json")
+		return
+	}
+
+	err = h.db.UpdateTime(containers)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error update time in psql")
+		return
+	}
+	c.String(http.StatusOK, "Time updated")
 }
 
 func (h *Handler) Delete(c *gin.Context) {

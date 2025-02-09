@@ -24,6 +24,8 @@ func main() {
 	r.PUT("/container", handler.Update)
 	r.DELETE("/container/:id", handler.Delete)
 
+	r.POST("/pinger", handler.UpdateTime)
+
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
 }

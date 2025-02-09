@@ -1,0 +1,37 @@
+
+services:
+    gin:
+        image: gin2
+        container_name: api
+        depends_on:
+            - db
+        networks:
+            - app_net
+        ports:
+            - "8080:8080"
+    db:
+        image: postgres:latest
+        networks:
+            - app_net
+        ports:
+            - "8081:5432"
+        environment: 
+            POSTGRES_PASSWORD: manager
+
+    
+
+    react-app:
+        build: ./frontend
+        container_name: frontend
+        networks:
+            - app_net
+        ports:
+           - "3000:3000"
+        volumes:
+            - ./frontend:/app
+        depends_on:
+            - gin
+    
+networks:
+    app_net:
+        external: true

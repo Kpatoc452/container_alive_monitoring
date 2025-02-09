@@ -1,9 +1,11 @@
 package storage
 
 import (
-	"fmt"
 	"log"
 	"testing"
+	"time"
+
+	"github.com/Kpatoc452/container_manager/models"
 )
 
 func TestPsqlContainers(t *testing.T) {
@@ -16,21 +18,10 @@ func TestPsqlContainers(t *testing.T) {
 	}
 	log.Println("Created")
 
-	containers, err := db.GetAll()
-	if err != nil {
-		panic(err)
+	test_cases := []models.Container{
+		{Id: 60, Address: "127.1.0.1:8080",LastPing:  time.Now(),LastSuccessPing:  time.Now()},
 	}
-
-	fmt.Println(containers)
-
-	for _, c := range containers {
-		err = db.Delete(c.Id)
-		if err != nil { 
-			panic(err)
-		}
-	}
-
-	containers, err = db.GetAll()
-
-	fmt.Println(containers)
+	
+	err = db.UpdateTime(test_cases)
+	log.Println(err)
 }
