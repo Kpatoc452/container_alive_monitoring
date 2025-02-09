@@ -1,28 +1,34 @@
-# Базовый сервис для мониторинга докер контейнеров  
+\# Базовый сервис для мониторинга докер контейнеров  
 ![image](https://github.com/user-attachments/assets/f1763fba-d5e0-41e6-9d29-97d9f4706812)
   
 **Команды для запуска**  
-`docker compose build  
-docker compose up`  
+```
+docker compose build  
+docker compose up  
+```
   
 **FRONTEND**  
 `localhost:3000`  
   
 **Endpoints**  
-`r.GET("/containers", handler.GetAllContainers)  
-r.GET("/container/:id", handler.GetContainerByID)  
+```
+r.GET("/containers", handler.GetAllContainers)  
+r.GET("/container/:id", handler.GetContainerByID)   
 r.POST("/container", handler.CreateContainer)  
 r.PUT("/container", handler.UpdateContainerByID)  
 r.DELETE("/container/:id", handler.DeleteContainerByID)  
-r.PUT("/pinger", handler.UpdateTimeContainers) // Endpoint for update time pings for pinger`  
+r.PUT("/pinger", handler.UpdateTimeContainers) // Endpoint for update time pings for pinger
+```
 
  **models.Container**
- `type Container struct {`
-`	Id              int       `json:"id"``
-`	Address         string    `json:"address"``
-`	LastSuccessPing time.Time `json:"last_success_ping"``
-`	LastPing        time.Time `json:"last_ping"``
-`}`
+ ```
+type Container struct {
+	Id              int       `json:"id"`
+	Address         string    `json:"address"`
+	LastSuccessPing time.Time `json:"last_success_ping"`
+	LastPing        time.Time `json:"last_ping"`
+}
+```
 
 ![image](https://github.com/user-attachments/assets/a1faf6c8-f063-48b2-a6ec-b492384cd434)
 
